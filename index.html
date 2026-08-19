@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Transfer text and files between two devices using only their screens and cameras. No network, no pairing.">
+    <meta name="theme-color" content="#0e7a66">
+    <title>qr-beam &middot; QR Data Transfer</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="vendor/qrcode.min.js"></script>
+    <script defer src="vendor/jsQR.min.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="mode-switch card">
+        <div class="mode-toolbar">
+          <div class="mode-actions" role="tablist" aria-label="Transfer mode">
+            <button id="mode-sender" class="mode-button active" type="button" data-mode="sender">Sender</button>
+            <button id="mode-receiver" class="mode-button" type="button" data-mode="receiver">Receiver</button>
+          </div>
+          <button id="focus-camera" class="focus-button" type="button">Focus Camera</button>
+        </div>
+        <p id="mode-summary" class="mode-summary">
+          Sender mode is active. Send text or a file and wait for ACK QR codes.
+        </p>
+      </section>
+
+      <section class="qr-stage card">
+        <div class="qr-stage-layout">
+          <div id="qr-code" class="qr-code" aria-live="polite"></div>
+          <div class="qr-camera-mini-shell">
+            <p class="qr-camera-mini-label">Camera Preview</p>
+            <video id="qr-camera-preview" class="qr-camera-mini" autoplay playsinline muted></video>
+          </div>
+        </div>
+        <p id="qr-caption" class="qr-caption">QR output will appear here.</p>
+        <p id="qr-progress" class="qr-progress">Progress: 0.0%</p>
+      </section>
+
+      <section class="camera-panel card">
+        <div class="section-heading">
+          <h2>Camera</h2>
+          <p id="camera-status">Camera is off.</p>
+        </div>
+
+        <video id="camera-preview" autoplay playsinline muted></video>
+        <canvas id="scan-canvas" hidden></canvas>
+      </section>
+
+      <section id="sender-panel" class="card panel active-panel">
+        <div class="section-heading">
+          <h2>Sender</h2>
+          <p id="sender-status">Idle.</p>
+        </div>
+
+        <label class="field">
+          <span>Text to send</span>
+          <textarea id="sender-text" rows="10" placeholder="Paste or type text here..."></textarea>
+        </label>
+
+        <label class="field">
+          <span>File to send</span>
+          <input id="sender-file" type="file">
+        </label>
+
+        <p id="sender-source-hint" class="helper-text">
+          If a file is selected, the transfer sends the file instead of the text above.
+        </p>
+
+        <div class="action-row">
+          <button id="start-send" type="button">Start Transfer</button>
+          <button id="stop-send" type="button" class="secondary">Stop Transfer</button>
+        </div>
+
+        <div class="field-grid compact-grid">
+          <label class="field">
+            <span>Base chunk size (bytes)</span>
+            <input id="base-chunk-size" type="number" min="16" max="1024" step="16" value="96">
+          </label>
+          <label class="field">
+            <span>Max chunk size (bytes)</span>
+            <input id="max-chunk-size" type="number" min="32" max="2048" step="16" value="768">
+          </label>
+          <label class="field">
+            <span>ACK timeout (ms)</span>
+            <input id="ack-timeout-ms" type="number" min="1000" max="10000" step="250" value="3000">
+          </label>
+        </div>
+      </section>
+
+      <section id="receiver-panel" class="card panel">
+        <div class="section-heading">
+          <h2>Receiver</h2>
+          <p id="receiver-status">Waiting for the first chunk.</p>
+        </div>
+
+        <label class="field">
+          <span>Received payload</span>
+          <textarea id="receiver-output" rows="10" readonly placeholder="Scanned text or file details will appear here..."></textarea>
+        </label>
+
+        <p id="receiver-file-meta" class="helper-text">
+          No completed file transfer yet.
+        </p>
+
+        <div class="action-row">
+          <button id="download-received" type="button" class="secondary" disabled>Download Received File</button>
+          <button id="reset-receiver" type="button">Reset Receiver</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-heading">
+          <h2>Activity</h2>
+          <p>Newest events appear first.</p>
+        </div>
+        <ul id="event-log" class="event-log"></ul>
+      </section>
+    </main>
+  </body>
+</html>
